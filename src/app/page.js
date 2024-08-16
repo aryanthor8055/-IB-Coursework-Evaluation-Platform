@@ -1,5 +1,7 @@
-'use client'
-import { useState } from 'react';
+'use client';
+import { useEffect, useState } from 'react';
+import useEvaluationStore from '@/store/store';
+import { useRouter } from 'next/navigation';
 import { FileUploader } from 'react-drag-drop-files';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,8 +11,45 @@ import Image from 'next/image';
 
 const HomePage = () => {
   const [file, setFile] = useState(null);
+  const [course, setCourse] = useState('');
+  const [subject, setSubject] = useState('');
+  const [title, setTitle] = useState('');
+  const addEvaluation = useEvaluationStore((state) => state.addEvaluation);
+  const router = useRouter();
+
   const handleChange = (file) => {
     setFile(file);
+  };
+
+  const handleEvaluate = () => {
+    if (!file || !course || !subject || !title) {
+      alert('Please fill in all fields and upload a file.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const newEvaluation = {
+        id: Date.now(),
+        fileData: reader.result, // store the file as base64
+        fileName: file.name,     // store the file name
+        overallScore: 13,
+        remark: 'Excellent',
+        date: new Date().toLocaleDateString(),
+        criteria: [
+          { name: 'Criterion A', score: 7 },
+          { name: 'Criterion B', score: 5 },
+          { name: 'Criterion C', score: 3 },
+        ],
+        course,
+        subject,
+        title,
+      };
+
+      addEvaluation(newEvaluation);
+      router.push(`/Evaluation-Display?id=${newEvaluation.id}`);
+    };
+    reader.readAsDataURL(file);
   };
 
   return (
@@ -30,7 +69,7 @@ const HomePage = () => {
               <div className="mt-6">
                 <div className="mb-2 text-[#001C46]">Select your course & subject*</div>
                 <div className='flex gap-4'>
-                  <Select>
+                  <Select onValueChange={setCourse}>
                     <SelectTrigger className="p-3 border border-gray-300 rounded-lg bg-white">
                       <SelectContent>
                         <SelectItem value="Physics">Physics</SelectItem>
@@ -38,11 +77,11 @@ const HomePage = () => {
                       </SelectContent>
                     </SelectTrigger>
                   </Select>
-                  <Select>
+                  <Select onValueChange={setSubject}>
                     <SelectTrigger className="p-3 border border-gray-300 rounded-lg bg-white">
                       <SelectContent>
-                        <SelectItem value="Subject">Subject</SelectItem>
                         <SelectItem value="Math">Math</SelectItem>
+                        <SelectItem value="Chemistry">Chemistry</SelectItem>
                       </SelectContent>
                     </SelectTrigger>
                   </Select>
@@ -50,9 +89,17 @@ const HomePage = () => {
               </div>
               <div className="mt-4">
                 <div className="mb-2 text-[#001C46]">Enter your essay title* (Required)</div>
-                <Input type="text" placeholder="How nation works..." className="w-full p-3 border border-[#F1C40F] rounded-lg bg-white mb-4" />
+                <Input
+                  type="text"
+                  placeholder="How nation works..."
+                  className="w-full p-3 border border-[#F1C40F] rounded-lg bg-white mb-4"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                />
               </div>
-              <Button className="bg-[#4E86FF] text-white w-full py-3 rounded-lg">Evaluate your Score</Button>
+               <Button onClick={handleEvaluate} className="bg-[#4E86FF] text-white w-full py-3 rounded-lg">
+        Evaluate your Score
+      </Button>
             </div>
 
             <div className="hidden lg:block w-full lg:w-1/2 pl-10">
