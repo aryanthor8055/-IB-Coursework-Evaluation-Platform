@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import useEvaluationStore from "@/store/store";
 import { useRouter } from "next/navigation";
 import { FileUploader } from "react-drag-drop-files";
@@ -23,6 +23,7 @@ import Sidebar from "@/components/Sidebar/Sidebar";
 import GeneralInfo from "@/components/General-Info/GeneralInfo";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { enableMocking } from "@/mocks/browser";
 
 const HomePage = () => {
   const [file, setFile] = useState(null);
@@ -37,6 +38,14 @@ const HomePage = () => {
   useEffect(() => {
     initializeStore(); // Initialize store with data from local storage
   }, [initializeStore]);
+
+  useLayoutEffect(() => {
+    (async () => {
+    await enableMocking();
+    const res = await fetch("/api/evaluate");
+    const response = await res.json();
+    })();
+    }, []);
 
   const handleChange = (file) => {
     setFile(file);
@@ -156,7 +165,7 @@ const HomePage = () => {
                       <SelectContent>
                         <SelectItem value="IO Example">IO Example</SelectItem>
                         <SelectItem value="EE Example">
-                        EE Example
+                          EE Example
                         </SelectItem>
                         <SelectItem value="IA Example">IA Example</SelectItem>
                         <SelectItem value="Tok Example">Tok Example</SelectItem>
@@ -218,51 +227,32 @@ const HomePage = () => {
           <div className="mt-12 ml-6">
             <h2 className="text-xl font-bold text-[#001C46]">My coursework</h2>
             <div className="flex gap-4 flex-wrap">
-              {evaluations.length > 0 ? (
-                evaluations.map((evaluation, index) => (
-                  <Card
-                    key={index}
-                    className="flex bg-white rounded-lg shadow-md p-4 w-[440px] h-[172px]"
-                  >
-                    <Image
-                      src="/assets/page.svg"
-                      alt={`Coursework Image ${index + 1}`}
-                      width={100}
-                      height={142}
-                    />
-                    <CardHeader className="p-3">
-                      <CardTitle className="text-sm">
-                        {evaluation.title}
-                      </CardTitle>
-                      <CardDescription>{evaluation.course}</CardDescription>
-                      <CardContent className="p-1">
-                        <Badge variant="outline" className='m-1'>👩‍🎓{evaluation.subject}</Badge>
-                        <Badge variant="outline" className='m-1'>⏰{evaluation.readTime}</Badge>
-                        <Badge variant="outline" className='m-1'>
-                          📄{evaluation.wordCount} words
-                        </Badge>
-                        <Badge variant="outline" className='m-1'>
-                          ⭐{evaluation.overallScore}/7
-                        </Badge>
-                        <Badge variant="outline" className='m-1'>🏆{evaluation.remark}</Badge>
-                      </CardContent>
-                    </CardHeader>
-                  </Card>
-                ))
-              ) : (
-                <div className="text-center w-full text-gray-500">
-                  No previous Coursework Present
-                </div>
-              )}
+            {[1, 2, 3, 4].map((_, index) => (
+                    <Card key={index} className="flex bg-white rounded-lg shadow-md p-4 w-[440px] h-[172px] p-1">
+                      <Image src="/assets/page.svg" alt={`Coursework Image ${index + 1}`} width={100} height={142} />
+                      <CardHeader className='p-3'>
+                        <CardTitle className="text-sm">How does the temperature of a Copper...</CardTitle>
+                        <CardDescription>How does the temperature of a Copper pipe affect the time it takes.. </CardDescription>
+                        <CardContent className="p-1">
+                          <Badge variant="outline" className="m-1">👩‍🎓Physics HL</Badge>
+                          <Badge variant="outline" className="m-1">⏰18 min read</Badge>
+                          <Badge variant="outline" className="m-1">📄2388 words</Badge>
+                          <Badge variant="outline" className="m-1">⭐7/7</Badge>
+                          <Badge variant="outline" className="m-1">👌English</Badge>
+                        </CardContent>
+                      </CardHeader>
+                    </Card>
+                  ))}
+
             </div>
             {
-              evaluations.length > 4 && ( <div className="text-center mt-2 cursor-pointer">
+              evaluations.length < 4 && (<div className="text-center mt-2 cursor-pointer">
                 <span className='text-[#98A1BB]'>
                   View all
                 </span>
               </div>)
             }
-           
+
           </div>
 
           <div className="mt-12 ml-6">
@@ -278,44 +268,46 @@ const HomePage = () => {
               </TabsList>
 
               <TabsContent value="all">
-              <div className="flex gap-4 flex-wrap mt-2">
-            {[1, 2, 3, 4].map((_, index) => (
-                <Card key={index} className="flex bg-white rounded-lg shadow-md p-4 w-[440px] h-[172px] p-1">
-                  <Image src="/assets/page.svg" alt={`Coursework Image ${index + 1}`} width={100} height={142} />
-                  <CardHeader className='p-3'>
-                    <CardTitle className="text-sm">How does the temperature of a Copper...</CardTitle>
-                    <CardDescription>How does the temperature of a Copper pipe affect the time it takes.. </CardDescription>
-                    <CardContent className="p-1">
-                      <Badge variant="outline" className="m-1">👩‍🎓Physics HL</Badge>
-                      <Badge variant="outline" className="m-1">⏰18 min read</Badge>
-                      <Badge variant="outline" className="m-1">📄2388 words</Badge>
-                      <Badge variant="outline" className="m-1">⭐7/7</Badge>
-                      <Badge variant="outline" className="m-1">👌English</Badge>
-                    </CardContent>
-                  </CardHeader>
-                </Card>
-              ))}
-            </div>
+                <div className="flex gap-4 flex-wrap mt-2">
+                  {[1, 2, 3, 4].map((_, index) => (
+                    <Card key={index} className="flex bg-white rounded-lg shadow-md p-4 w-[440px] h-[172px] p-1">
+                      <Image src="/assets/page.svg" alt={`Coursework Image ${index + 1}`} width={100} height={142} />
+                      <CardHeader className='p-3'>
+                        <CardTitle className="text-sm">How does the temperature of a Copper...</CardTitle>
+                        <CardDescription>How does the temperature of a Copper pipe affect the time it takes.. </CardDescription>
+                        <CardContent className="p-1">
+                          <Badge variant="outline" className="m-1">👩‍🎓Physics HL</Badge>
+                          <Badge variant="outline" className="m-1">⏰18 min read</Badge>
+                          <Badge variant="outline" className="m-1">📄2388 words</Badge>
+                          <Badge variant="outline" className="m-1">⭐7/7</Badge>
+                          <Badge variant="outline" className="m-1">👌English</Badge>
+                        </CardContent>
+                      </CardHeader>
+                    </Card>
+                  ))}
+                </div>
               </TabsContent>
 
               <TabsContent value="IA Example">
-                {/* Engineering-specific content */}
                 <div className="text-center w-full text-gray-500">
-                  No Engineering Coursework Present
+                  No IA Example Coursework Present
                 </div>
               </TabsContent>
 
-              <TabsContent value="mba">
-                {/* MBA-specific content */}
+              <TabsContent value="EE Example">
                 <div className="text-center w-full text-gray-500">
-                  No MBA Coursework Present
+                  No EE Example Coursework Present
                 </div>
               </TabsContent>
 
-              <TabsContent value="medical">
-                {/* Medical-specific content */}
+              <TabsContent value="IO Example">
                 <div className="text-center w-full text-gray-500">
-                  No Medical Coursework Present
+                  No IO Example Coursework Present
+                </div>
+              </TabsContent>
+              <TabsContent value="Tok Example">
+                <div className="text-center w-full text-gray-500">
+                  No Tok Example Coursework Present
                 </div>
               </TabsContent>
             </Tabs>
